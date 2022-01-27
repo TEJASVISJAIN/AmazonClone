@@ -1,0 +1,70 @@
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, useWindowDimensions } from 'react-native';
+
+interface ImageCarouselProps{
+  images: string[];
+}
+
+const ImageCarousel = ({images}: ImageCarouselProps) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const windowWidth = useWindowDimensions().width;
+  const viewConfigRef = React.useRef({ viewAreaCoveragePercentThreshold: 50,  minimumViewTime: 300,})
+  const onFlatlistUpdate = useCallback(({viewableItems}) => {
+    if (viewableItems.length > 0) {
+      setActiveIndex(viewableItems[0].index || 0);
+    }
+    // console.log(viewableItems);
+  }, []);
+  
+  return (
+    <View>
+      <FlatList
+        data={images}
+        renderItem={({item})=>(
+          <Image style={[styles.image, {width: windowWidth - 40}]} source={{uri : item}} />
+        )}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={windowWidth - 30}
+        snapToAlignment={'center'}
+        decelerationRate={'fast'}
+        viewabilityConfig={viewConfigRef.current}
+        onViewableItemsChanged={onFlatlistUpdate}
+      />
+      <View style={styles.dots}>
+        {images.map((image,index)=>(
+          <View style={[styles.dot, {
+            backgroundColor: index === activeIndex? "#c9c9c9" : "#ededed"
+          }]} />
+  ))}  
+      </View>
+      
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  root:{
+
+  },
+  image:{
+    margin: 10,
+    height: 250,
+    resizeMode: 'contain'
+  },
+  dot:{
+    height:10,
+    width:10,
+    borderRadius:10,
+    borderWidth: 1,
+    borderColor: '#c9c9c9',
+    margin: 5
+  },
+  dots:{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
+})
+
+export default ImageCarousel;
